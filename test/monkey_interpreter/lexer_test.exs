@@ -20,6 +20,7 @@ defmodule MonkeyInterpreter.LexerTest do
         %Token{type: :eof, value: nil}
       ]
 
+      assert length(tokens) == length(expected_tokens)
       for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
     end
   end

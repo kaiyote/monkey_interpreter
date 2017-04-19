@@ -8,8 +8,8 @@ defmodule MonkeyInterpreter.Token do
   @typedoc "The `Token` struct"
   @type t :: %__MODULE__{
     type: token_type,
-    value: String.t
+    value: String.t | nil
   }
 
-  defstruct [:type, :value]
+  defstruct type: :illegal, value: nil
 end
