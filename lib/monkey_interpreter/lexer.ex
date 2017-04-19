@@ -39,34 +39,19 @@ defmodule MonkeyInterpreter.Lexer do
       {%MonkeyInterpreter.Lexer{ch: nil, input: "=;", position: 2, read_position: 3}, %MonkeyInterpreter.Token{type: :eof, value: nil}}
   """
   @spec next_token(t) :: {t, Token.t}
-  def next_token(%Lexer{ch: "=", next_ch: c} = lex) do
-    case c do
-      "=" -> {lex |> read_char |> read_char, %Token{type: :eq, value: "=="}}
-      _ -> {read_char(lex), %Token{type: :assign, value: "="}}
-    end
+  def next_token(%Lexer{ch: "=", next_ch: "="} = lex) do
+    {lex |> read_char |> read_char, %Token{type: :eq, value: "=="}}
   end
-  def next_token(%Lexer{ch: "!", next_ch: c} = lex) do
-    case c do
-      "=" -> {lex |> read_char |> read_char, %Token{type: :not_eq, value: "!="}}
-      _ -> {read_char(lex), %Token{type: :bang, value: "!"}}
-    end
+  def next_token(%Lexer{ch: "!", next_ch: "="} = lex) do
+    {lex |> read_char |> read_char, %Token{type: :not_eq, value: "!="}}
   end
-  def next_token(%Lexer{ch: ";"} = lex), do: {read_char(lex), %Token{type: :semicolon, value: ";"}}
-  def next_token(%Lexer{ch: "("} = lex), do: {read_char(lex), %Token{type: :lparen, value: "("}}
-  def next_token(%Lexer{ch: ")"} = lex), do: {read_char(lex), %Token{type: :rparen, value: ")"}}
-  def next_token(%Lexer{ch: ","} = lex), do: {read_char(lex), %Token{type: :comma, value: ","}}
-  def next_token(%Lexer{ch: "+"} = lex), do: {read_char(lex), %Token{type: :plus, value: "+"}}
-  def next_token(%Lexer{ch: "{"} = lex), do: {read_char(lex), %Token{type: :lbrace, value: "{"}}
-  def next_token(%Lexer{ch: "}"} = lex), do: {read_char(lex), %Token{type: :rbrace, value: "}"}}
-  def next_token(%Lexer{ch: "-"} = lex), do: {read_char(lex), %Token{type: :minus, value: "-"}}
-  def next_token(%Lexer{ch: "/"} = lex), do: {read_char(lex), %Token{type: :slash, value: "/"}}
-  def next_token(%Lexer{ch: "*"} = lex), do: {read_char(lex), %Token{type: :asterisk, value: "*"}}
-  def next_token(%Lexer{ch: "<"} = lex), do: {read_char(lex), %Token{type: :lt, value: "<"}}
-  def next_token(%Lexer{ch: ">"} = lex), do: {read_char(lex), %Token{type: :gt, value: ">"}}
-  def next_token(%Lexer{ch: nil} = lex), do: {lex, %Token{type: :eof, value: nil}}
+  def next_token(%Lexer{ch: c} = lex) when is_special(c) do
+    {read_char(lex), %Token{type: Token.char_to_type(c), value: c}}
+  end
   def next_token(%Lexer{ch: c} = lex) when is_letter(c), do: read_identifier lex
   def next_token(%Lexer{ch: c} = lex) when is_digit(c), do: read_number lex
   def next_token(%Lexer{ch: c} = lex) when is_whitespace(c), do: lex |> read_char |> next_token
+  def next_token(%Lexer{ch: nil} = lex), do: {lex, %Token{type: :eof, value: nil}}
   def next_token(%Lexer{ch: c} = lex), do: {read_char(lex), %Token{type: :illegal, value: c}}
 
   @spec read_char(t) :: t

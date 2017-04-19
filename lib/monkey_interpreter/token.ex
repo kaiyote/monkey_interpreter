@@ -14,4 +14,20 @@ defmodule MonkeyInterpreter.Token do
   }
 
   defstruct type: :illegal, value: nil
+
+  @spec char_to_type(String.t) :: token_type
+  def char_to_type(";"), do: :semicolon
+  def char_to_type(","), do: :comma
+  def char_to_type("("), do: :lparen
+  def char_to_type(")"), do: :rparen
+  def char_to_type("{"), do: :lbrace
+  def char_to_type("}"), do: :rbrace
+  def char_to_type("+"), do: :plus
+  def char_to_type("-"), do: :minus
+  def char_to_type("*"), do: :asterisk
+  def char_to_type("/"), do: :slash
+  def char_to_type("<"), do: :lt
+  def char_to_type(">"), do: :gt
+  def char_to_type("="), do: :assign
+  def char_to_type("!"), do: :bang
 end
