@@ -1,8 +1,9 @@
 defmodule MonkeyInterpreter.Lexer do
-  @moduledoc false
+  @moduledoc "Takes a string and turns it into a list of `Tokens`"
 
   alias MonkeyInterpreter.{Lexer, Token}
 
+  @typedoc "The `Lexer` struct"
   @type t :: %__MODULE__{
     input: String.t | nil,
     position: non_neg_integer,
@@ -12,6 +13,7 @@ defmodule MonkeyInterpreter.Lexer do
 
   defstruct input: nil, position: 0, read_position: 0, ch: nil
 
+  @doc "Constructs a lexer out of an input string"
   @spec make_lexer(String.t) :: t
   def make_lexer(input) do
     lexer = %Lexer{input: input}
