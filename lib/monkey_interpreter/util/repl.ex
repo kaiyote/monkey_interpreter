@@ -21,10 +21,10 @@ defmodule MonkeyInterpreter.Util.Repl do
   end
 
   defp print_token({_, %Token{type: :eof}}) do
-    IO.puts("%Token{type: :#{:eof}, value: nil}")
+    IO.puts(~s(%Token{type: :#{:eof}, value: nil}))
   end
   defp print_token({lexer, token}) do
-    IO.puts("%Token{type: :#{token.type}, value: #{token.value}}")
+    IO.puts(~s(%Token{type: :#{token.type}, value: "#{token.value}"},))
     print_tokens lexer
   end
 end
