@@ -23,6 +23,26 @@ defmodule MonkeyInterpreter.Lexer do
     read_char lexer
   end
 
+  @doc """
+  Creates a stream of `Tokens` from an input string
+
+  This halts when it finds :eof, instead of passing it
+  along to the next stage in the process.
+  """
+  @spec make_lexer_stream(String.t) :: Enumerable.t
+  def make_lexer_stream(input) do
+    Stream.resource(
+      fn -> make_lexer input end,
+      fn lexer ->
+        case Lexer.next_token lexer do
+          {lexer, %{type: :eof}} -> {:halt, lexer}
+          {lexer, token} -> {[token], lexer}
+        end
+      end,
+      fn _ -> :eof end
+    )
+  end
+
   @doc ~S"""
   Returns the token for the current lexeme, and an appropriately advanced lexer.
 

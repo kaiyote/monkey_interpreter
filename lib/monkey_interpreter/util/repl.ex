@@ -3,7 +3,7 @@ defmodule MonkeyInterpreter.Util.Repl do
 
   alias MonkeyInterpreter.{Lexer, Token}
 
-  @prompt ">>"
+  @prompt ">> "
 
   def loop do
     case IO.gets @prompt do

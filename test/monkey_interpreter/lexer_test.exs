@@ -7,8 +7,35 @@ defmodule MonkeyInterpreter.LexerTest do
 
   describe "lexer" do
     test "can generate the proper list of tokens", context do
-      tokens = cycle_lexer_to_eof context[:short_lexer]
-      expected_tokens = [
+      tokens = context[:short_input] |> Lexer.make_lexer |> cycle_lexer_to_eof
+      expected_tokens = context[:short_expected_tokens]
+
+      for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
+      assert length(tokens) == length(expected_tokens)
+    end
+
+    test "can lex a pseudo-monkey program", context do
+      tokens = context[:long_input] |> Lexer.make_lexer |> cycle_lexer_to_eof
+      expected_tokens = context[:long_expected_tokens]
+
+      for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
+      assert length(tokens) == length(expected_tokens)
+    end
+
+    test "can get the tokens as a stream", context do
+      tokens = context[:long_input] |> Lexer.make_lexer_stream
+      # need to shave off the :eof since the lexer stream just halts instead of returning it
+      expected_tokens = Enum.take_while context[:long_expected_tokens],
+        fn %{type: t} -> t != :eof end
+
+      for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
+      assert tokens |> Enum.to_list |> length() == length(expected_tokens)
+    end
+  end
+
+  setup do
+    [short_input: "=+(){},;",
+     short_expected_tokens: [
         %Token{type: :assign, value: "="},
         %Token{type: :plus, value: "+"},
         %Token{type: :lparen, value: "("},
@@ -17,16 +44,28 @@ defmodule MonkeyInterpreter.LexerTest do
         %Token{type: :rbrace, value: "}"},
         %Token{type: :comma, value: ","},
         %Token{type: :semicolon, value: ";"},
-        %Token{type: :eof, value: nil}
-      ]
+        %Token{type: :eof, value: nil}],
+     long_input: "let five = 5;
+     let ten = 10;
 
-      for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
-      assert length(tokens) == length(expected_tokens)
-    end
+     let add = fn(x, y) {
+       x + y;
+     };
 
-    test "can lex a pseudo-monkey program", context do
-      tokens = cycle_lexer_to_eof context[:long_lexer]
-      expected_tokens = [
+     let result = add(five, ten);
+     !-/*5;
+     5 < 10 > 5;
+
+     if (5 < 10) {
+       return true;
+     } else {
+       return false;
+     }
+
+     10 == 10;
+     10 != 9;
+     ",
+     long_expected_tokens: [
         %Token{type: :let, value: "let"},
         %Token{type: :ident, value: "five"},
         %Token{type: :assign, value: "="},
@@ -101,35 +140,8 @@ defmodule MonkeyInterpreter.LexerTest do
         %Token{type: :int, value: "9"},
         %Token{type: :semicolon, value: ";"},
         %Token{type: :eof}
-      ]
+      ]]
 
-      for {actual, expected} <- Enum.zip(tokens, expected_tokens), do: assert actual == expected
-      assert length(tokens) == length(expected_tokens)
-    end
-  end
-
-  setup do
-    [short_lexer: Lexer.make_lexer("=+(){},;"),
-     long_lexer: Lexer.make_lexer("let five = 5;
-     let ten = 10;
-
-     let add = fn(x, y) {
-       x + y;
-     };
-
-     let result = add(five, ten);
-     !-/*5;
-     5 < 10 > 5;
-
-     if (5 < 10) {
-       return true;
-     } else {
-       return false;
-     }
-
-     10 == 10;
-     10 != 9;
-     ")]
   end
 
   defp cycle_lexer_to_eof(lexer, tokens \\ [])
